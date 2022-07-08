@@ -251,28 +251,39 @@ class LineageQueryResult(object):
         result_dict = vars(self)
         return (str({k: [vars(val) for val in v] for k, v in result_dict.items()}))
 
-    # def _get_network(self):
-
     def _import_visual_modules(self):
         """Import modules needed for visualization."""
-
-        import dash_cytoscape as cyto
         global cyto
-        from jupyter_dash import JupyterDash
+        import dash_cytoscape as cyto
         global JupyterDash
-        from dash import html
+        from jupyter_dash import JupyterDash
         global html
+        from dash import html
+
+    def _get_verts(self):
+        """Convert vertices to tuple format for visualizer""" 
+        verts = []
+        for vert in self.vertices:
+            verts.append((vert.arn, vert.lineage_source))
+        return verts
+
+    def _get_edges(self):
+        """Convert edges to tuple format for visualizer"""
+        edges = []
+        for edge in self.edges:
+            edges.append((edge.source_arn, edge.destination_arn))
+        return edges
 
     def visualize(self):
         """Visualize lineage query result."""
 
         self._import_visual_modules()
 
-        cyto.load_extra_layouts()
+        cyto.load_extra_layouts() # load "klay" layout (hierarchical layout) from extra layouts
         app = JupyterDash(__name__)
 
-        verts = [('0', '0'), ('1', '1'), ['2', '2']]
-        edges = [('0', '1'), ('0', '2')]
+        verts = self._get_verts()        
+        edges = self._get_edges()
 
         nodes = [
             {
@@ -322,8 +333,6 @@ class LineageQueryResult(object):
         ])
 
         return app.run_server(mode="inline")
-
-
 
 class LineageFilter(object):
     """A filter used in a lineage query."""

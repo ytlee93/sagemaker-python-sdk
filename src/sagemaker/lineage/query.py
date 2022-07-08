@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Union, List, Dict
+from importlib import import_module
 
 from sagemaker.lineage._utils import get_resource_name_from_arn
 
@@ -249,6 +250,79 @@ class LineageQueryResult(object):
         """
         result_dict = vars(self)
         return (str({k: [vars(val) for val in v] for k, v in result_dict.items()}))
+
+    # def _get_network(self):
+
+    def _import_visual_modules(self):
+        """Import modules needed for visualization."""
+
+        import dash_cytoscape as cyto
+        global cyto
+        from jupyter_dash import JupyterDash
+        global JupyterDash
+        from dash import html
+        global html
+
+    def visualize(self):
+        """Visualize lineage query result."""
+
+        self._import_visual_modules()
+
+        cyto.load_extra_layouts()
+        app = JupyterDash(__name__)
+
+        verts = [('0', '0'), ('1', '1'), ['2', '2']]
+        edges = [('0', '1'), ('0', '2')]
+
+        nodes = [
+            {
+                'data': {'id': id, 'label': label},
+            }
+            for id, label in verts
+        ]
+
+        edges = [
+            {'data': {'source': source, 'target': target}}
+            for source, target in (
+                edges
+            )
+        ]
+
+        elements = nodes + edges
+
+        app.layout = html.Div([
+            cyto.Cytoscape(
+                id='cytoscape-layout-1',
+                elements=elements,
+                style={'width': '100%', 'height': '350px'},
+                layout={
+                    'name': 'klay'
+                },
+                stylesheet=[
+                    {
+                        'selector': 'node',
+                        'style': {
+                            'label': 'data(label)',
+                            'font-size': '7px'
+                        }
+                    },
+                    {
+                        'selector': 'edge',
+                        'style': {
+                            'width': '1px',
+                            'curve-style': 'straight',
+                            'target-arrow-color': 'black',
+                            'target-arrow-shape': 'triangle',
+                            'line-color': 'black',
+                        }
+                    }
+                ],
+                responsive=True
+            )
+        ])
+
+        return app.run_server(mode="inline")
+
 
 
 class LineageFilter(object):

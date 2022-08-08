@@ -78,3 +78,51 @@ def traverse_graph_forward(start_arn, sagemaker_session):
 
     ret = []
     return visit(start_arn, set())
+
+class LineageResourceHelper:
+    def __init__(self, sagemaker_session):
+        self.client = sagemaker_session.sagemaker_client
+        self.artifacts = []
+        self.associations = []
+
+    def create_artifact(self, artifact_name, artifact_type="Dataset"):
+        response = self.client.create_artifact(
+            ArtifactName=artifact_name,
+            Source={
+                "SourceUri": "Test-artifact-" + artifact_name,
+                "SourceTypes": [
+                    {"SourceIdType": "S3ETag", "Value": "Test-artifact-sourceId-value"},
+                ],
+            },
+            ArtifactType=artifact_type,
+        )
+        self.artifacts.append(response["ArtifactArn"])
+
+        return response["ArtifactArn"]
+
+    def create_association(self, source_arn, dest_arn, association_type="AssociatedWith"):
+        response = self.client.add_association(
+            SourceArn=source_arn, DestinationArn=dest_arn, AssociationType=association_type
+        )
+        if "SourceArn" in response.keys():
+            self.associations.append((source_arn, dest_arn))
+            return True
+        else:
+            return False
+
+    def clean_all(self):
+        # clean all lineage data created by LineageResourceHelper
+
+        time.sleep(1)  # avoid GSI race condition between create & delete
+
+        for source, dest in self.associations:
+            try:
+                self.client.delete_association(SourceArn=source, DestinationArn=dest)
+            except Exception as e:
+                print("skipped " + str(e))
+
+        for artifact_arn in self.artifacts:
+            try:
+                self.client.delete_artifact(ArtifactArn=artifact_arn)
+            except Exception as e:
+                print("skipped " + str(e))

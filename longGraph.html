@@ -1,0 +1,80 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vis-network@latest/styles/vis-network.css" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vis-network@latest/dist/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 100%;
+            height: 500px;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/d3a6d99bb3aa8e7e738d81c89c55cf90", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/df45532152443f4d47d75c02cfa5c53c", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/99c2caf2535228501c40180f42f353c6", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/3fd0ecf0c378aa6469f3b6a911889e53", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/186d3b7f13c1e41dcf5a0a086ab365ad", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/8bc2f828a5a317670f007b140f9340f2", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/5b395d1ecce02e147f435cc7ef849326", "label": "Dataset", "shape": "star", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/385f0deabd3359bb9fdc7853b8f62095", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/634ebcafba11890c2856f0eb30e81539", "label": "Dataset", "shape": "dot", "title": "Artifact"}, {"color": "#146eb4", "id": "arn:aws:sagemaker:us-west-2:627802892972:artifact/13d3fbc06c7483a655cd674a59b1b70a", "label": "Dataset", "shape": "dot", "title": "Artifact"}]);
+        edges = new vis.DataSet([{"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/5b395d1ecce02e147f435cc7ef849326", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/634ebcafba11890c2856f0eb30e81539"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/634ebcafba11890c2856f0eb30e81539", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/99c2caf2535228501c40180f42f353c6"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/186d3b7f13c1e41dcf5a0a086ab365ad", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/8bc2f828a5a317670f007b140f9340f2"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/13d3fbc06c7483a655cd674a59b1b70a", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/df45532152443f4d47d75c02cfa5c53c"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/99c2caf2535228501c40180f42f353c6", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/13d3fbc06c7483a655cd674a59b1b70a"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/3fd0ecf0c378aa6469f3b6a911889e53", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/d3a6d99bb3aa8e7e738d81c89c55cf90"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/df45532152443f4d47d75c02cfa5c53c", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/186d3b7f13c1e41dcf5a0a086ab365ad"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/8bc2f828a5a317670f007b140f9340f2", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/385f0deabd3359bb9fdc7853b8f62095"}, {"arrows": "to", "from": "arn:aws:sagemaker:us-west-2:627802892972:artifact/385f0deabd3359bb9fdc7853b8f62095", "title": "AssociatedWith", "to": "arn:aws:sagemaker:us-west-2:627802892972:artifact/3fd0ecf0c378aa6469f3b6a911889e53"}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {"configure": {"enabled": false}, "layout": {"hierarchical": {"enabled": true, "blockShifting": true, "direction": "LR", "sortMethod": "directed", "shakeTowards": "leaves"}}, "interaction": {"multiselect": true, "navigationButtons": true}, "physics": {"enabled": false, "hierarchicalRepulsion": {"centralGravity": 0, "avoidOverlap": null}, "minVelocity": 0.75, "solver": "hierarchicalRepulsion"}};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>

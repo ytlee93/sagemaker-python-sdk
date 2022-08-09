@@ -13,12 +13,8 @@
 """This module contains code to test SageMaker ``LineageQueryResult.visualize()``"""
 from __future__ import absolute_import
 import time
-import os
-
-import pytest
 
 import sagemaker.lineage.query
-from sagemaker.lineage.query import LineageQueryDirectionEnum
 from tests.integ.sagemaker.lineage.helpers import name, LineageResourceHelper
 
 
@@ -35,7 +31,8 @@ def test_LineageResourceHelper(sagemaker_session):
     finally:
         lineage_resource_helper.clean_all()
 
-@pytest.mark.skip("query load test")
+
+# @pytest.mark.skip("query load test")
 def test_large_query(sagemaker_session):
     lineage_resource_helper = LineageResourceHelper(sagemaker_session=sagemaker_session)
     large_data_root_arn = lineage_resource_helper.create_artifact(artifact_name=name())
@@ -46,7 +43,7 @@ def test_large_query(sagemaker_session):
     #         \ \--> Artifact
     #          \--->  ...
     try:
-        for i in range(150):
+        for i in range(220):
             artifact_arn = lineage_resource_helper.create_artifact(artifact_name=name())
             lineage_resource_helper.create_association(
                 source_arn=large_data_root_arn, dest_arn=artifact_arn
@@ -56,7 +53,7 @@ def test_large_query(sagemaker_session):
 
         lq = sagemaker.lineage.query.LineageQuery(sagemaker_session)
         lq_result = lq.query(start_arns=[large_data_root_arn])
-        assert len(lq_result.edges) == 150
+        assert len(lq_result.edges) == 220
 
     except Exception as e:
         print(e)
@@ -64,6 +61,7 @@ def test_large_query(sagemaker_session):
 
     finally:
         lineage_resource_helper.clean_all()
+
 
 def test_query(sagemaker_session):
     lineage_resource_helper = LineageResourceHelper(sagemaker_session=sagemaker_session)

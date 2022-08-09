@@ -79,6 +79,7 @@ def traverse_graph_forward(start_arn, sagemaker_session):
     ret = []
     return visit(start_arn, set())
 
+
 class LineageResourceHelper:
     def __init__(self, sagemaker_session):
         self.client = sagemaker_session.sagemaker_client

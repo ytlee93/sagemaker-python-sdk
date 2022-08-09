@@ -273,11 +273,13 @@ class LineageQuery(object):
             sagemaker_session=self._session,
         )
 
-    def _convert_api_response(self, response) -> LineageQueryResult:
+    def _convert_api_response(self, response, converted) -> LineageQueryResult:
         """Convert the lineage query API response to its Python representation."""
-        converted = LineageQueryResult()
-        converted.edges = [self._get_edge(edge) for edge in response["Edges"]]
-        converted.vertices = [self._get_vertex(vertex) for vertex in response["Vertices"]]
+
+        for edge in response["Edges"]:
+            converted.edges.append(self._get_edge(edge))
+        for vertex in response["Vertices"]:
+            converted.vertices.append(self._get_vertex(vertex))
 
         edge_set = set()
         for edge in converted.edges:
@@ -351,14 +353,27 @@ class LineageQuery(object):
         Returns:
             LineageQueryResult: The lineage query result.
         """
-        query_response = self._session.sagemaker_client.query_lineage(
+        client_query_response = self._session.sagemaker_client.query_lineage(
             StartArns=start_arns,
             Direction=direction.value,
             IncludeEdges=include_edges,
             Filters=query_filter._to_request_dict() if query_filter else {},
             MaxDepth=max_depth,
         )
-        query_response = self._convert_api_response(query_response)
+        query_result = LineageQueryResult()
+        query_response = self._convert_api_response(client_query_response, query_result)
         query_response = self._collapse_cross_account_artifacts(query_response)
+
+        while "NextToken" in client_query_response.keys():
+            client_query_response = self._session.sagemaker_client.query_lineage(
+                StartArns=start_arns,
+                Direction=direction.value,
+                IncludeEdges=include_edges,
+                Filters=query_filter._to_request_dict() if query_filter else {},
+                MaxDepth=max_depth,
+                NextToken=client_query_response["NextToken"],
+            )
+            query_response = self._convert_api_response(client_query_response, query_response)
+            query_response = self._collapse_cross_account_artifacts(query_response)
 
         return query_response

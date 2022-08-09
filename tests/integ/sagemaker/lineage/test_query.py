@@ -35,7 +35,7 @@ def test_LineageResourceHelper(sagemaker_session):
     finally:
         lineage_resource_helper.clean_all()
 
-# @pytest.mark.skip("query load test")
+@pytest.mark.skip("query load test")
 def test_large_query(sagemaker_session):
     lineage_resource_helper = LineageResourceHelper(sagemaker_session=sagemaker_session)
     large_data_root_arn = lineage_resource_helper.create_artifact(artifact_name=name())
@@ -52,9 +52,41 @@ def test_large_query(sagemaker_session):
                 source_arn=large_data_root_arn, dest_arn=artifact_arn
             )
 
+        time.sleep(1)
+
         lq = sagemaker.lineage.query.LineageQuery(sagemaker_session)
         lq_result = lq.query(start_arns=[large_data_root_arn])
         assert len(lq_result.edges) == 150
+
+    except Exception as e:
+        print(e)
+        assert False
+
+    finally:
+        lineage_resource_helper.clean_all()
+
+def test_query(sagemaker_session):
+    lineage_resource_helper = LineageResourceHelper(sagemaker_session=sagemaker_session)
+    large_data_root_arn = lineage_resource_helper.create_artifact(artifact_name=name())
+
+    # create large lineage data
+    # Artifact ----> Artifact
+    #        \ \ \-> Artifact
+    #         \ \--> Artifact
+    #          \--->  ...
+    try:
+        for i in range(10):
+            artifact_arn = lineage_resource_helper.create_artifact(artifact_name=name())
+            lineage_resource_helper.create_association(
+                source_arn=large_data_root_arn, dest_arn=artifact_arn
+            )
+
+        time.sleep(1)
+
+        lq = sagemaker.lineage.query.LineageQuery(sagemaker_session)
+        lq_result = lq.query(start_arns=[large_data_root_arn])
+        assert len(lq_result.edges) == 10
+        assert len(lq_result.vertices) == 11
 
     except Exception as e:
         print(e)
